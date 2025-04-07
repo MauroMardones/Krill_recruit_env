@@ -1,5 +1,5 @@
 ---
-title: "Supporting Information 1"
+title: "Supporting Information 2"
 subtitle: "Environmental and Predation Factors on the Population Dynamics of Antarctic Krill (*Euphausia superba*) from an Integrated Catch-at-Length Model Perspective"
 author: "Mardones, M; Jarvis Mason, E.T.;  Santa Cruz, F.; Pinones, A.; Cárdenas, C.A"
 date:  "07 April, 2025"
@@ -59,21 +59,17 @@ library(sjPlot)
 library(CCAMLRGIS)
 library(tinytable)
 library(ggcorrplot)
+library(broom)
 ```
 
 
 # Background
 
-This study aims to explore the relationship between environmental variables and the population dynamics of krill (*Euphausia superba*), incorporating spatial complexity and biological components such as length data from fishery monitoring. By using mixed-effects models, we assess how environmental factors influence krill size distribution across different strata, considering both spatial and temporal scales.  
-
-# Objective
-
-The primary goal of this analysis is to empirically verify the influence of environmental factors on krill population dynamics, specifically through length variability, which serves as an indicator of growth fluctuations. By identifying correlations between environmental variables and population or fishery indicators, this study also aims to establish a time series of key environmental factors for potential integration into stock assessment models. This approach follows similar methodologies to @Wang2021, but applied to a longer fishery time series.  
+This study aims to explore the relationship between environmental variables and the population dynamics of krill (*Euphausia superba*), incorporating spatial complexity and biological components such as length data from fishery monitoring. By using lineal models, we assess how environmental factors influence krill recruit across different strata, considering both spatial and temporal scales.  By identifying correlations between environmental variables and population or fishery indicators, this study also aims to establish a time series of key environmental factors for potential integration into stock assessment models. This approach follows similar methodologies to @Wang2021, but applied to a longer fishery time series.  
 
 # Hypothesis
 
-Our main research question concerns the effects of distinct physical and oceYeargraphic factors in the Southern Ocean on krill population structure. Specifically, we examine whether environmental variability drives changes in krill length distribution within the fishery, influencing population dynamics across spatial and temporal dimensions.  
-
+Our main research question concerns the effects of distinct physical and oceanographic factors in the Southern Ocean on krill population structure. Specifically, we examine whether environmental variability drives changes in krill recruit within the fishery, influencing population dynamics across spatial and temporal dimensions.  
 
 
 # Methodology
@@ -96,13 +92,33 @@ load("~/DOCAS/Data/Kril Env Recruit/data/sf4_nochina.RData")
 data_large2 <- read_csv("data/datapost_LBSPR.csv")
 ```
 
-Figure \@ref(fig:Figure2) consists of two side-by-side scatterplots, each displaying trends in krill length over time (years) for different spatial strata (ID).
 
 
 ``` r
 sf5 <- as.data.frame(sf4) %>% 
   dplyr::select(1, 10, 11)
 ```
+
+Here’s how you can describe the methodology for calculating the krill recruitment index in a scientific paper, with the terms explained in English:
+
+The recruitment index is calculated by first determining the proportion of juvenile krill individuals based on their total length, specifically those under a threshold of 3.6 cm. This proportion is calculated as the ratio of juvenile individuals to the total number of krill sampled within a given year and for each identified group (ID). The resulting proportion is then transformed using a logarithmic function to obtain the variable **PROPLOG**, which represents the log-transformed recruitment index.
+
+Next, the **PROPLOG** values are standardized to fall within a specific range, typically between -1 and 1. This standardization process is achieved by applying the following equation:
+
+\[
+\text{PROPLOG2} = \frac{\text{PROPLOG} - \text{min}(\text{PROPLOG})}{\text{max}(\text{PROPLOG}) - \text{min}(\text{PROPLOG})} \times (b - a) + a
+\]
+
+In this equation:
+
+- **PROPLOG** is the logarithm of the proportion of juvenile krill individuals.
+- **PROPLOG2** is the standardized recruitment index, scaled between -1 and 1.
+- **min()** and **max()** refer to the minimum and maximum values of **PROPLOG** across all observations.
+- **a** and **b** are the lower and upper bounds of the desired range for standardization, which are set to -1 and 1, respectively.
+
+Finally, the standardized index is categorized into two groups based on its value: "positive" for values greater than or equal to 0, and "negative" for values below 0. This categorization allows for further analysis of recruitment trends and patterns within the krill population over time.
+
+This methodology ensures that the recruitment index is both consistent and comparable across different years and groups.
 
 
 ``` r
@@ -137,14 +153,11 @@ ggplot(indice_reclutamiento %>%
   labs(title = "", y = "Recruit Index", x = "", fill = "") +
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        axis.text = element_text(size=5),
+        axis.text = element_text(size=7),
         legend.position = "none")
 ```
 
 <img src="index_files/figure-html/unnamed-chunk-4-1.jpeg" style="display: block; margin: auto;" />
-
-
-Join base
 
 
 ``` r
@@ -155,7 +168,7 @@ data_large2 <- data_large2 %>%
 data_completa <- left_join(data_large2, 
                            indice_reclutamiento, 
                            by = c("ID", "Year"))
-saveRDS(data_completa, "data/Data_recruit_env.Rdata")
+#saveRDS(data_completa, "data/Data_recruit_env.Rdata")
 ```
 
 
@@ -180,10 +193,12 @@ $\begin{aligned} r = 1- \frac{6\sum_{i=1}^n D_{i}^n}{n (n^2 - 1)}\end{aligned}$
 
 
 ``` r
-data_corr <- data_large2 %>% 
-  dplyr::select(-ID, -Year, - SPR, -`SE SPR`) %>%  # Elimina las variables categóricas
-  cor(method = "pearson", 
-                 use = "complete.obs")  # Calcula la correlación excluyendo NA
+# Seleccionar las columnas que son numéricas y calcular la correlación
+data_corr <- data_completa %>%
+  dplyr::select(-ID, -color_index) %>%  # Elimina las variables no numéricas
+  # Asegurarse de que todas las columnas sean numéricas
+  dplyr::mutate(across(where(is.character), as.numeric)) %>%
+  cor(method = "pearson", use = "complete.obs")  # Calcula la correlación excluyendo NA
 ```
 
 
@@ -204,14 +219,13 @@ ggcorrplot(data_corr, method = "circle",
 
 The correlation matrix provides valuable insights into the relationships among the variables (Figure \@ref(fig:Figure3)):  
 
-**Sea ice (seaice)** is **negatively correlated with LENGTH (-0.339)** and **LENGTH_P75 (-0.329)**, suggesting that higher sea ice levels might be associated with smaller organism sizes.  **TSM** has a **moderate positive correlation with LENGTH (0.330) and LENGTH_P75 (0.298)**, indicating that turbidity may be linked to larger body sizes. **Chla** is **negatively correlated with LENGTH (-0.421) and LENGTH_P75 (-0.393)**, implying that areas with higher chlorophyll-a concentrations may have smaller individuals.   Based on the correlation matrix provided, the relationship between **Chla and TSM** is strong and negative (**r = -0.73**). This indicates that as **TSM increases, Chla tends to decrease**, suggesting a potential inverse relationship between these two environmental variables. Given this strong correlation, it will be necessary to account for this relationship in the GLMM models, either by:  
+This plot is a correlation matrix that visualizes the pairwise relationships between variables using both color intensity and numerical values. Yellow indicates strong positive correlations (close to +1), green indicates strong negative correlations (close to –1), and lighter colors represent weaker correlations (closer to 0). The size of each circle is also proportional to the strength of the correlation.
 
-1. Incorporating both variables separately, treating them as independent predictors.  
-2. Modeling their correlation explicitly, such as including an interaction term (**TSM and Chla**) to assess their combined effect.  
-3. Testing alternative models to evaluate whether including both variables together introduces multicollinearity issues.  
+The variables `PROLOG` and `PROP` are highly positively correlated, with values around 0.70–0.71. Similarly, `MAT` (presumably maturity) shows strong positive correlations with `LENGTH` (0.78) and `LENGTH_P75` (0.76), suggesting that as individuals grow larger, their maturity increases.
 
-By considering these approaches, we aim to capture the effects of environmental conditions on LENGTH and LENGTH_P75 while ensuring statistical robustness. These insights will help refine the **GLMM** models to better capture the environmental effects on population structure while maintaining statistical reliability. 
+On the other hand, `seaice` is negatively correlated with several biological variables: it has a correlation of –0.97 with `tsm`, –0.79 with `Chla`, –0.78 with `MAT`, and –0.81 with `LENGTH`. This suggests that higher sea ice coverage is associated with lower temperature, lower chlorophyll a concentration, lower maturity, and smaller lengths.
 
+Moderate positive correlations are also observed among `SPR`, `SE SPR`, and `CATCH`, as well as between `biot`, `cvto`, and the productivity indices. This pattern may indicate a potential linkage between biological productivity and reproductive metrics.
 
 ## Variable Distribution
 
@@ -237,33 +251,24 @@ ggplot(data_filtered2, aes(x = Valor)) +
 <img src="index_files/figure-html/Figure4-1.jpeg" alt="Distribution of numerical variables to test assumtion of regresion models" width="80%" />
 <p class="caption">(\#fig:Figure4)Distribution of numerical variables to test assumtion of regresion models</p>
 </div>
-To ensure independence from the assumption of normality in variable behavior, we will use **Generalized Linear Mixed Models (GLMMs)**. This approach is appropriate because GLMMs allow for **non-normal distributions** of response variables and can account for **hierarchical or grouped data structures** by incorporating random effects. In our case, GLMMs help model variations in `LENGTH` and `LENGTH_P75` while considering **both fixed effects (categorical factors like `ID`) and random effects (environmental covariates and `Year`)**. This methodology provides **greater flexibility** compared to standard linear models, making it suitable for ecological and fisheries research where data often exhibit heteroscedasticity and non-normal distributions.
 
 ## Models
 
-To evaluate the spatial and temporal variability of krill length from fishery and its relationship with environmental covariates, we applied a series of regression models, including generalized linear models (GLMs) and general linear mixed-effects models (GLMMs). Initial GLMs were constructed to assess the fixed effects of year (Year), spatial strata (ID), sea ice concentration, chlorophyll-a (Chla), and sea surface temperature (TSM) on krill length. To account for the hierarchical structure of the data, we incorporated random intercepts for year (Year) and, in some models, for spatial strata (ID) using the `lme4` package in R. Interactions between ID and Year were tested to explore whether temporal trends in krill length differed across spatial units. Model selection was based on the Akaike Information Criterion (AIC) and residual deviance, with lower values indicating better model fit. Variance inflation factors (VIF) were calculated to check for multicollinearity among environmental predictors, and when necessary, covariates were standardized or imputed to handle missing data. The inclusion of random effects allowed us to capture unexplained annual variability while accounting for spatial heterogeneity in krill growth patterns. Visualization of model predictions and marginal effects was conducted using the `ggeffects` and `sjPlot` packages [@Ludecke2024], providing insights into how krill length dynamics respond to environmental and spatial drivers over time.  
+The analysis of the correlation between the recruitment index (PROPLOG2) and environmental variables will be approached through a series of regression models designed to examine the impact of various environmental factors on the recruitment process of krill. These models progressively include more explanatory variables, allowing us to evaluate the relative contribution of each environmental factor, as well as potential interactions between them, on the recruitment index. Each model represents a different level of complexity and addresses distinct aspects of the potential relationship between recruitment and environmental conditions.
 
-### GLMM models
+In the first model (Mod 1), the recruitment index is modeled solely as a function of the ID, which represents a baseline level of recruitment. This model serves as a starting point for understanding the overall distribution of recruitment across different IDs without considering any environmental factors.
 
-Random effects are a way to model variability in data that comes from
-factors that cannot be directly measured or controlled. In the context
-of statistical models, random effects refer to variables that are
-assumed to have an unknown probability distribution, and are included in
-the model to explain some of the variation in the data. Random effects are often modeled by using mixed effects models, which combine random and fixed effects in the same model. Fixed effects are
-those that are assumed to be constant for all study units and are
-directly measured, while random effects are those that are assumed to
-vary randomly across study units and cannot be directly measured.
+The second model (Mod 2) introduces *Chla* (chlorophyll a concentration) as an additional explanatory variable. This model will allow for the evaluation of how changes in primary production, represented by chlorophyll a, may influence recruitment. The inclusion of chlorophyll a will help determine whether biological productivity, as reflected by phytoplankton concentrations, plays a role in shaping recruitment dynamics.
 
-In short, random effects are a way of modeling variability in data that
-cannot be directly explained by the variables measured in the study, and
-are included in the model to improve the precision of the estimates and
-reduce the potential for bias [@McCulloch2001; @Bates2015].
+The third model (Mod 3) further expands on the previous one by including *TSM* (total suspended matter), which is a measure of the particulate matter in the water column. This model investigates whether changes in suspended matter, which could affect light penetration and, consequently, primary production, influence recruitment. The model will examine how both chlorophyll a and TSM, as separate environmental variables, contribute to the variation in recruitment.
 
-In our models, **ID represents the stratum** within the study area, and it is treated as a fixed effect. This approach assumes that each stratum has a specific and constant influence on the response variable (*LENGTH* or *LENGTH_P75*), allowing for direct estimation and comparison of its effects. By treating ID as a fixed effect, we acknowledge that each stratum possesses unique environmental and oceYeargraphic characteristics that may impact the response variable differently. This approach contrasts with a random effects model, which would assume that the observed strata are a random sample from a larger population, estimating only the variance between them rather than their specific effects. Given that the number of strata is finite and known, and our interest lies in explicitly assessing differences among them rather than making inferences beyond the observed data, treating ID as a fixed effect is the most appropriate choice.
+The fourth model (Mod 4) incorporates *seaice* as an additional explanatory factor. Sea ice presence and its seasonal variations have been shown to impact the distribution and availability of krill habitats. By including sea ice in the model, we aim to explore the potential impact of this variable on recruitment, alongside chlorophyll a and suspended matter.
 
-In our models, **Year represents the temporal component** and is treated as a random effect. This approach assumes that annual variations influence the response variable (*LENGTH* or *LENGTH_P75*), but rather than estimating specific effects for each year, we model their variance as a way to account for unobserved temporal fluctuations. By treating Year as a random effect, we acknowledge that interannual variability may be influenced by unmeasured environmental or ecological factors, reducing the risk of overfitting and allowing for more generalizable inferences. This also improves model parsimony by capturing temporal correlations without requiring individual year-specific coefficients. Since our interest lies in understanding general temporal patterns rather than estimating the fixed influence of each year, treating Year as a random effect is the most appropriate methodological choice.
+The fifth model (Mod 5) introduces an interaction term between *TSM* and *Chla*, which allows for the examination of how the combined effect of these two environmental factors might influence recruitment. This interaction term will help determine whether the relationship between TSM and recruitment is modified by the presence of chlorophyll a, or vice versa. This model will help us understand whether the effects of primary production and suspended matter on recruitment are synergistic or independent.
 
+Finally, the model labeled "Mod 5 Lag" considers a lag effect for both TSM and Chla, where the values of these variables from the previous time point are included. This lag effect will help us assess whether past environmental conditions influence current recruitment levels, reflecting the potential delayed response of the ecosystem to changes in these variables.
 
+By comparing the results of these models, we can systematically evaluate the contribution of each environmental factor and their interactions to the recruitment index. The inclusion of lags in the final model will provide insights into the temporal dynamics of the recruitment process, shedding light on how past environmental conditions might influence current recruitment patterns. This methodology allows for a comprehensive assessment of the factors affecting krill recruitment and their potential implications for the population dynamics of this important marine species.
 
 \[
 \text{Mod 1:} \quad PROPLOG2_{i} = \beta_0 + \beta_1 ID_{i} + \epsilon_i
@@ -289,13 +294,8 @@ In our models, **Year represents the temporal component** and is treated as a ra
 \text{Mod 5 Lag:} \quad PROPLOG2_{i} = \beta_0 + \beta_1 ID_{i} + \beta_2 seaice_{i} + \beta_3 TSM_{i-1} + \beta_4 Chla_{i-1} + \beta_5 (TSM_{i-1} \times Chla_{i-1})_{i} + \epsilon_i
 \]
 
----
 
-Este cambio asegura que estamos trabajando con `PROPLOG2` como la variable dependiente en lugar de `LENGTH` o `LENGTH_P75`, y además hemos eliminado el efecto aleatorio de `YEAR_i` de cada modelo.
-
-Si necesitas más ajustes o si deseas visualizar los resultados de los modelos, no dudes en decirme.
-
-This represents each model in mathematical terms, where \(\beta\) are the coefficients, \( (1 | Year_i) \) represents the random effect of Year, and \(\epsilon_i\) is the error term.
+This represents each model in mathematical terms, where \(\beta\) are the coefficients and \(\epsilon_i\) is the error term.
 
 
 
@@ -472,32 +472,108 @@ predict `LENGTH` with `ID`, `seaice`, `tsm` and `Chla` (formula: LENGTH ~ ID + s
 (95% CI [3.65, 6.39], t(51) = 7.36, p < .001). about colinearity, the effect of tsm × Chla is statistically non-significant and negative (beta = -0.11, 95% CI [-0.23, 7.00e-03], t(51) = -1.89, p = 0.064; Std. beta = -0.25, 95% CI [-0.52, 0.02])
 
 
-Figure \@ref(fig:Figure6) presents two panels, each illustrating different aspects of a mixed-effects model analyzing krill *LENGTH*. The left panel displays the random effects associated with interannual variability, where the x-axis represents the magnitude of the random effects, with a vertical reference line at zero indicating no effect, and the y-axis corresponds to different years from 2001 to 2020. Each point represents the estimated random effect for a given year, with horizontal error bars indicating confidence intervals. Blue points denote positive effects, while red points signify negative ones. Notably, some years, such as 2008, 2012, and 2004, show more pronounced negative effects, whereas other years exhibit relatively small variations around zero.  
+``` r
+tabla_coef <- broom::tidy(mod2_R)
 
-The right panel visualizes the estimated fixed effects of different spatial strata (ID [SSWI], ID [EI], ID [JOIN], ID [GS]) and chlorophyll-a concentration (*Chla*) on krill length. The x-axis represents the estimated effect size, with a vertical line at zero serving as a reference, while the y-axis lists the fixed effects included in the model. Each point represents the estimated coefficient for a given variable, with horizontal error bars showing confidence intervals. The results indicate that all fixed effects have a positive influence on krill length, with *Chla* and certain spatial strata showing stronger effects.  
+# Redondear columnas numéricas
+tabla_coef <- tabla_coef %>%
+  mutate(across(where(is.numeric), round, 4))
 
-Overall, the plot suggests that krill length is influenced by both interannual variability and spatial-environmental factors. The random effects panel highlights fluctuations in krill size over time, while the fixed effects panel confirms that spatial structure and chlorophyll-a concentration play significant roles in shaping krill growth patterns. This analysis provides valuable insights into how environmental and regional factors contribute to krill population dynamics.
+# Crear tabla HTML
+tabla_coef %>%
+  kable(format = "html", escape = FALSE,
+        caption = "Summary of GLM model for PROPLOG2",
+        col.names = c("Term", "Estimate", "Std. Error", "t value", "Pr(>|t|)")) %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+```
 
-# Conclusion
+<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>(\#tab:unnamed-chunk-9)Summary of GLM model for PROPLOG2</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Term </th>
+   <th style="text-align:right;"> Estimate </th>
+   <th style="text-align:right;"> Std. Error </th>
+   <th style="text-align:right;"> t value </th>
+   <th style="text-align:right;"> Pr(&gt;|t|) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> (Intercept) </td>
+   <td style="text-align:right;"> -26.0863 </td>
+   <td style="text-align:right;"> 30.8799 </td>
+   <td style="text-align:right;"> -0.8448 </td>
+   <td style="text-align:right;"> 0.4063 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> IDEI </td>
+   <td style="text-align:right;"> -2.6355 </td>
+   <td style="text-align:right;"> 0.8193 </td>
+   <td style="text-align:right;"> -3.2167 </td>
+   <td style="text-align:right;"> 0.0036 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> IDJOIN </td>
+   <td style="text-align:right;"> -1.6326 </td>
+   <td style="text-align:right;"> 0.3821 </td>
+   <td style="text-align:right;"> -4.2721 </td>
+   <td style="text-align:right;"> 0.0002 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Year </td>
+   <td style="text-align:right;"> 0.0136 </td>
+   <td style="text-align:right;"> 0.0153 </td>
+   <td style="text-align:right;"> 0.8881 </td>
+   <td style="text-align:right;"> 0.3830 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chla </td>
+   <td style="text-align:right;"> -0.9401 </td>
+   <td style="text-align:right;"> 0.3997 </td>
+   <td style="text-align:right;"> -2.3521 </td>
+   <td style="text-align:right;"> 0.0268 </td>
+  </tr>
+</tbody>
+</table>
 
-Our analysis aimed to explore the spatial variability in krill *LENGTH* and the 75th percentile of length (*LENGTH_P75*) while incorporating key environmental covariates, such as chlorophyll-a concentration (Chla), sea surface temperature (TSM), and sea ice cover. Using mixed-effects models, we evaluated the influence of these environmental factors on krill growth across different spatial strata (ID) while accounting for temporal variability by including year (Year) as a random effect. The inclusion of interactions between TSM and Chla allowed us to capture potential synergistic or antagonistic effects of these variables, providing insights into how environmental variability drives size distribution across regions.  
 
-Among the tested models, **Model 5** which includes spatial strata (ID), sea ice, and the interaction between TSM and Chla—performed best based on AIC selection criteria. The model revealed significant annual and spatial variability in *LENGTH*, suggesting that both temporal and spatial factors play a crucial role in shaping this response variable. Among the environmental predictors, Chla exhibited a notable effect, indicating its potential influence on LENGTH, while the effects of tsm and seaice were more uncertain, with wide confidence intervals suggesting a higher degree of variability or weaker associations. Additionally, the random effects associated with ID were significant, highlighting differences among stratas that may be driven by intrinsic biological factors. These findings emphasize the importance of accounting for both fixed and random effects when analyzing variations in LENGTH over time and across individuals.
 
-On one hand, the mixed-effects models confirm the influence of spatial structure, where each stratum represents a distinct environmental context affecting both the dependent variable (krill sizes) and independent variables (environmental factors). This highlights the importance of considering spatial heterogeneity in growth studies.  
+The results from the generalized linear model (GLM) with the formula `PROPLOG2 ~ ID + Year + Chla` are as follows:
 
-Additionally, our results corroborate the influence of environmental variables on krill size variability. Among them, chlorophyll-a emerged as the most significant factor, with a negative effect on krill size. This suggests that higher chlorophyll concentrations lead to increased recruitment, as the greater availability of phytoplankton provides a more abundant substrate for the krill population, thereby shifting the size structure toward smaller individuals.  
+The coefficients are as follows:
 
-Overall, these findings demonstrate that krill population structure is shaped not only by fishing pressure but also by environmental conditions. By incorporating these environmental components into stock assessment models, we enhance our understanding of krill population dynamics in the Antarctic Peninsula, particularly in Subarea 48.1, and improve the ecological realism of predictive models such as LBSPR.
+- **(Intercept)**: -26.08628, p = 0.406254  
+  The intercept is negative (-26.08628) but not statistically significant (p = 0.406), indicating that it does not have a meaningful effect on the response variable.
+
+- **IDEI (ID)**: -2.63547, p = 0.003567  
+  The coefficient for `IDEI` is negative (-2.63547) and statistically significant (p = 0.003567), suggesting that an increase in `IDEI` leads to a decrease in `PROPLOG2`.
+
+- **IDJOIN (ID)**: -1.63256, p = 0.000246  
+  The coefficient for `IDJOIN` is also negative (-1.63256) and highly statistically significant (p = 0.000246). This indicates that an increase in `IDJOIN` is associated with a decrease in `PROPLOG2`.
+
+- **Year (Año)**: 0.01358, p = 0.382954  
+  The coefficient for `Year` is positive (0.01358), but it is not statistically significant (p = 0.383), suggesting that `Year` does not have a meaningful effect on `PROPLOG2`.
+
+- **Chla (Chlorophyll a)**: -0.94014, p = 0.026849  
+  The coefficient for `Chla` is negative (-0.94014) and statistically significant (p = 0.026849), indicating that an increase in `Chla` leads to a decrease in `PROPLOG2`.
+
+Regarding the model fit:
+
+- The **null deviance** is 10.8104, which represents the deviance of a model with no predictors.
+- The **residual deviance** is 4.3936, which is the deviance of the fitted model.
+- The **AIC (Akaike Information Criterion)** is 39.505, which helps to compare this model to others (lower values indicate a better fit).
+
+The model uses two iterations of Fisher scoring for optimization.
+
+In summary, the model suggests that `IDEI`, `IDJOIN`, and `Chla` have significant effects on `PROPLOG2`, while `Year` does not. The residual deviance and AIC indicate a reasonable fit, but the model could potentially be improved by including more predictors or transformations.
 
 
 
 
 ``` r
-# cobn lag
-# Crear una nueva variable con SPR retrasado un año
 data_large3 <- data_completa %>%
-  arrange(ID, Year) %>%  # Asegurar que los datos están ordenados
+  arrange(ID, Year) %>%  
   group_by(ID) %>%
   mutate(SPR_lag = lag(SPR)) %>%
   ungroup()
@@ -518,18 +594,40 @@ ggplot(data_large3 %>%
   theme_minimal() +  
   scale_color_viridis_d(option="F",
                         name="") +  
-  labs(title = "Relación entre Chl-a y Recruit index",
+  labs(title = "",
        x = "Chl-a",
        y = "Recruit Index",
        color = "Año")
 ```
 
-<img src="index_files/figure-html/unnamed-chunk-10-1.jpeg" style="display: block; margin: auto;" />
+<img src="index_files/figure-html/unnamed-chunk-11-1.jpeg" style="display: block; margin: auto;" />
+
+
+
+# Conclusion
+
+
+The results of Model 2, which includes `ID`, `Year`, and `Chla` as predictors for `PROPLOG2`, reveal several significant findings. The negative coefficient for `IDEI` indicates that as `IDEI` increases, the response variable `PROPLOG2` decreases, with a statistically significant p-value (0.003567). Similarly, the negative coefficient for `IDJOIN` suggests that an increase in `IDJOIN` also leads to a decrease in `PROPLOG2`, and this relationship is highly significant (p = 0.000246).
+
+While the `Year` variable shows a positive but non-significant effect (p = 0.382954), suggesting that the year does not have a notable impact on `PROPLOG2`, the `Chla` variable exhibits a significant negative relationship with the response variable (p = 0.026849). This suggests that higher levels of chlorophyll-a (`Chla`) are associated with lower values of `PROPLOG2`.
+
+The model’s AIC value (39.505) and residual deviance (4.3936) suggest a reasonable fit, with the predictors included contributing to explaining the variability in the response variable. However, given that `Year` is not statistically significant, further investigation could explore alternative variables or transformations to improve the model's explanatory power.
+
+Our analysis aimed to explore the spatial variability in krill *LENGTH* and the 75th percentile of length (*LENGTH_P75*) while incorporating key environmental covariates, such as chlorophyll-a concentration (Chla), sea surface temperature (TSM), and sea ice cover. Using mixed-effects models, we evaluated the influence of these environmental factors on krill growth across different spatial strata (ID) while accounting for temporal variability by including year (Year) as a random effect. The inclusion of interactions between TSM and Chla allowed us to capture potential synergistic or antagonistic effects of these variables, providing insights into how environmental variability drives size distribution across regions.  
+
+Among the tested models, **Model 5** which includes spatial strata (ID), sea ice, and the interaction between TSM and Chla—performed best based on AIC selection criteria. The model revealed significant annual and spatial variability in *LENGTH*, suggesting that both temporal and spatial factors play a crucial role in shaping this response variable. Among the environmental predictors, Chla exhibited a notable effect, indicating its potential influence on LENGTH, while the effects of tsm and seaice were more uncertain, with wide confidence intervals suggesting a higher degree of variability or weaker associations. Additionally, the random effects associated with ID were significant, highlighting differences among stratas that may be driven by intrinsic biological factors. These findings emphasize the importance of accounting for both fixed and random effects when analyzing variations in LENGTH over time and across individuals.
+
+On one hand, the mixed-effects models confirm the influence of spatial structure, where each stratum represents a distinct environmental context affecting both the dependent variable (krill sizes) and independent variables (environmental factors). This highlights the importance of considering spatial heterogeneity in growth studies.  
+
+Additionally, our results corroborate the influence of environmental variables on krill size variability. Among them, chlorophyll-a emerged as the most significant factor, with a negative effect on krill size. This suggests that higher chlorophyll concentrations lead to increased recruitment, as the greater availability of phytoplankton provides a more abundant substrate for the krill population, thereby shifting the size structure toward smaller individuals.  
+
+Overall, these findings demonstrate that krill population structure is shaped not only by fishing pressure but also by environmental conditions. By incorporating these environmental components into stock assessment models, we enhance our understanding of krill population dynamics in the Antarctic Peninsula, particularly in Subarea 48.1, and improve the ecological realism of predictive models such as LBSPR.
+
 
 
 # Code Repository
 
-The data, codes and Yearther documents of this analysis can be found in the following link [Krill Length Correlations](https://github.com/MauroMardones/Krill_Length_Cor)
+The data, codes and other documents of this analysis can be found in the following link [Environment and Krill Recruit relation](https://github.com/MauroMardones/Krill_recruit_env)
 
 # References
 
