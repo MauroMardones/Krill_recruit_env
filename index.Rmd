@@ -206,7 +206,7 @@ data_corr <- data_completa %>%
 ```
 
 
-```{r Figure3, out.width='80%', fig.cap="Coorrelation plot to different variables."}
+```{r Figure3, fig.height=8, fig.width=7, fig.cap="Coorrelation plot to different variables."}
 ggcorrplot(data_corr, method = "circle", 
            type = "lower", 
            colors = c("green", "white", "yellow"),

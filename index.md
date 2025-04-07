@@ -79,7 +79,7 @@ Our main research question concerns the effects of distinct physical and oceanog
 Figure \@ref(fig:Figure1) (S2 Fig 1 now) illustrates the spatial heterogeneity of key environmental and population variables across different management units (BS, EI, GS, JOIN, SSWI) in the Antarctic Peninsula, where krill populations are distributed. Biomass and catch trends show substantial variability between strata, with BS and GS exhibiting the highest biomass estimates, whereas JOIN and SSWI display comparatively lower values. Catch levels also differ significantly, with BS and GS experiencing the most intensive exploitation, while SSWI and JOIN have minimal catch records.  Environmental variables further highlight this heterogeneity. Sea surface temperature (SST) trends vary among strata, with GS and JOIN exhibiting a slight warming trend over time, while BS and EI remain relatively stable. Sea ice cover differs substantially, with GS showing consistently high coverage, whereas JOIN presents greater fluctuations. Chlorophyll-a (Chl-a) levels, a proxy for primary productivity, also vary across regions, with BS and GS showing declining trends, while EI and SSWI remain relatively stable at lower concentrations.  Given these spatial differences in both krill population metrics and environmental conditions, it is essential to analyze and estimate SPR at this local scale. The observed heterogeneity supports the need for spatially explicit management, as krill population dynamics are likely influenced by regional environmental drivers. By incorporating SPR analysis at this resolution, we can provide a spatial explicit framework for sustainable krill management, ensuring that conservation efforts align with local population and ecosystem characteristics.
 
 <div class="figure" style="text-align: center">
-<img src="index_files/figure-html/var_env.png" alt="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)" width="90%" />
+<img src="index_files/figure-html/var_env.png" alt="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)" width="70%" />
 <p class="caption">(\#fig:Figure1)Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)</p>
 </div>
 
@@ -212,7 +212,7 @@ ggcorrplot(data_corr, method = "circle",
 ```
 
 <div class="figure" style="text-align: center">
-<img src="index_files/figure-html/Figure3-1.jpeg" alt="Coorrelation plot to different variables." width="80%" />
+<img src="index_files/figure-html/Figure3-1.jpeg" alt="Coorrelation plot to different variables."  />
 <p class="caption">(\#fig:Figure3)Coorrelation plot to different variables.</p>
 </div>
 
@@ -588,7 +588,7 @@ ggplot(data_large3 %>%
   geom_point(size = 3, 
              alpha = 0.7, 
              aes(color = as.factor(Year))) +  
-  geom_smooth(method = "lm", se = TRUE, color = "black") +  
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  
   stat_cor(method = "pearson", label.x.npc = "left") +  # Añade R en cada facet
   #facet_wrap(~ID, scales = "free", ncol=5) +  
   theme_minimal() +  
