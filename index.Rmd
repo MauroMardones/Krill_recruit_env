@@ -426,6 +426,8 @@ ggplot(data_large3 %>%
        y = "Recruit Index",
        color = "Año")
 
+
+
 ```
 
 
