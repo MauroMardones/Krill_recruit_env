@@ -1,7 +1,7 @@
 ---
 title: "Supporting Information 2"
-subtitle: "Environmental and Predation Factors on the Population Dynamics of Antarctic Krill (*Euphausia superba*) from an Integrated Catch-at-Length Model Perspective"
-author: "Mardones, M; Jarvis Mason, E.T.;  Santa Cruz, F.; Pinones, A.; Cárdenas, C.A"
+subtitle: "Code and analysis for identifying environmental influences on krill length using correlation and mixed-effects models across spatial and temporal scales"
+#author: "Mardones, M; Jarvis Mason, E.T.;  Santa Cruz, F.; Pinones, A.; Cárdenas, C.A"
 date:  "`r format(Sys.time(), '%d %B, %Y')`"
 bibliography: envrecr.bib
 csl: apa.csl
@@ -23,20 +23,25 @@ output:
     self-contained: true
     code-tools: true
     number_sections: false
+    always_allow_html: true
 editor_options: 
   markdown: 
     wrap: 72
 ---
 
+\pagebreak
+
 
 ```{r setup1, echo=FALSE}
 rm(list = ls())
-knitr::opts_chunk$set(echo = TRUE,
-                      message = FALSE,
+knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE,
                       fig.align = 'center',
                       dev = 'jpeg',
-                      dpi = 300)
+                      dpi = 300,
+                      tidy.opts = list(width.cutoff = 55),
+                      tidy = TRUE,
+                      fig.pos = "H")
 #XQuartz is a mess, put this in your onload to default to cairo instead
 options(bitmapType = "cairo") 
 # (https://github.com/tidyverse/ggplot2/issues/2655)
@@ -45,7 +50,7 @@ options(bitmapType = "cairo")
 
 
 
-```{r lib, message=F, echo= TRUE}
+```{r lib, message=F, echo = FALSE}
 library(here)
 #analisis
 library(ggsignif)
@@ -73,45 +78,44 @@ library(ggcorrplot)
 library(broom)
 ```
 
+\pagebreak
 
 # Background
 
-This study aims to explore the relationship between environmental variables and the population dynamics of krill (*Euphausia superba*), incorporating spatial complexity and biological components such as length data from fishery monitoring. By using lineal models, we assess how environmental factors influence krill recruit across different strata, considering both spatial and temporal scales.  By identifying correlations between environmental variables and population or fishery indicators, this study also aims to establish a time series of key environmental factors for potential integration into stock assessment models. This approach follows similar methodologies to @Wang2021, but applied to a longer fishery time series.  
+This study aims to explore the relationship between environmental variables and the population dynamics of krill (*Euphausia superba*), incorporating spatial complexity and biological components such as length data from fishery monitoring. By using lineal models, we assess how environmental factors influence krill recruit across different strata, considering both spatial and temporal scales.  By identifying correlations between environmental variables and population or fishery indicators, this study also aims to establish a time series of key environmental factors for potential integration into stock assessment models. This approach follows similar methodologies to @Wang2021, but applied to a longer fishery time series.  Our main research question concerns the effects of distinct physical and oceanographic factors in the Southern Ocean on krill population structure. Specifically, we examine whether environmental variability drives changes in krill recruit within the fishery, influencing population dynamics across spatial and temporal dimensions.  
 
-# Hypothesis
-
-Our main research question concerns the effects of distinct physical and oceanographic factors in the Southern Ocean on krill population structure. Specifically, we examine whether environmental variability drives changes in krill recruit within the fishery, influencing population dynamics across spatial and temporal dimensions.  
-
+\pagebreak
 
 # Methodology
 
 ## Spatial heterogeneity 
 
-Figure \@ref(fig:Figure1) (S2 Fig 1 now) illustrates the spatial heterogeneity of key environmental and population variables across different management units (BS, EI, GS, JOIN, SSWI) in the Antarctic Peninsula, where krill populations are distributed. Biomass and catch trends show substantial variability between strata, with BS and GS exhibiting the highest biomass estimates, whereas JOIN and SSWI display comparatively lower values. Catch levels also differ significantly, with BS and GS experiencing the most intensive exploitation, while SSWI and JOIN have minimal catch records.  Environmental variables further highlight this heterogeneity. Sea surface temperature (SST) trends vary among strata, with GS and JOIN exhibiting a slight warming trend over time, while BS and EI remain relatively stable. Sea ice cover differs substantially, with GS showing consistently high coverage, whereas JOIN presents greater fluctuations. Chlorophyll-a (Chl-a) levels, a proxy for primary productivity, also vary across regions, with BS and GS showing declining trends, while EI and SSWI remain relatively stable at lower concentrations.  Given these spatial differences in both krill population metrics and environmental conditions, it is essential to analyze and estimate SPR at this local scale. The observed heterogeneity supports the need for spatially explicit management, as krill population dynamics are likely influenced by regional environmental drivers. By incorporating SPR analysis at this resolution, we can provide a spatial explicit framework for sustainable krill management, ensuring that conservation efforts align with local population and ecosystem characteristics.
+Figure \@ref(fig:Figure1) illustrates the spatial heterogeneity of key environmental and population variables across different management units (BS, EI, GS, JOIN, SSWI) in the Antarctic Peninsula, where krill populations are distributed. Biomass and catch trends show substantial variability between strata, with BS and GS exhibiting the highest biomass estimates, whereas JOIN and SSWI display comparatively lower values. Catch levels also differ significantly, with BS and GS experiencing the most intensive exploitation, while SSWI and JOIN have minimal catch records.  Environmental variables further highlight this heterogeneity. Sea surface temperature (SST) trends vary among strata, with GS and JOIN exhibiting a slight warming trend over time, while BS and EI remain relatively stable. Sea ice cover differs substantially, with GS showing consistently high coverage, whereas JOIN presents greater fluctuations. Chlorophyll-a (Chl-a) levels, a proxy for primary productivity, also vary across regions, with BS and GS showing declining trends, while EI and SSWI remain relatively stable at lower concentrations.  Given these spatial differences in both krill population metrics and environmental conditions, it is essential to analyze and estimate SPR at this local scale. The observed heterogeneity supports the need for spatially explicit management, as krill population dynamics are likely influenced by regional environmental drivers. By incorporating SPR analysis at this resolution, we can provide a spatial explicit framework for sustainable krill management, ensuring that conservation efforts align with local population and ecosystem characteristics.
 
-```{r Figure1, echo=FALSE, out.width='70%', fig.cap="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)"}
+```{r Figure1, echo=FALSE, out.width='90%', fig.cap="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)"}
 knitr::include_graphics('index_files/figure-html/var_env.png')
 ```
 
-## Length composition data as indicator of krill dynamics
+## Length composition data as indicator of recruitment 
 
-```{r}
+This analysis was made follow @Perry2020 method.
+
+```{r echo=FALSE}
 #Load data procesed
 load("~/DOCAS/Data/Kril Env Recruit/data/sf4_nochina.RData")
 data_large2 <- read_csv("data/datapost_LBSPR.csv")
 ```
 
 
-```{r}
+```{r echo=FALSE}
 sf5 <- as.data.frame(sf4) %>% 
   dplyr::select(1, 10, 11)
 ```
 
-Here’s how you can describe the methodology for calculating the krill recruitment index in a scientific paper, with the terms explained in English:
 
-The recruitment index is calculated by first determining the proportion of juvenile krill individuals based on their total length, specifically those under a threshold of 3.6 cm. This proportion is calculated as the ratio of juvenile individuals to the total number of krill sampled within a given year and for each identified group (ID). The resulting proportion is then transformed using a logarithmic function to obtain the variable **PROPLOG**, which represents the log-transformed recruitment index.
+The recruitment index is calculated by first determining the proportion of juvenile krill individuals based on their total length, specifically those under a threshold of 3.6 cm. This proportion is calculated as the ratio of juvenile individuals to the total number of krill sampled within a given year and for each identified group (ID). The resulting proportion is then transformed using a logarithmic function of length, which represents the log-transformed recruitment index.
 
-Next, the **PROPLOG** values are standardized to fall within a specific range, typically between -1 and 1. This standardization process is achieved by applying the following equation:
+Next, the *PROPLOG* values are standardized to fall within a specific range, typically between -1 and 1. This standardization process is achieved by applying the following equation:
 
 \[
 \text{PROPLOG2} = \frac{\text{PROPLOG} - \text{min}(\text{PROPLOG})}{\text{max}(\text{PROPLOG}) - \text{min}(\text{PROPLOG})} \times (b - a) + a
@@ -149,7 +153,9 @@ indice_reclutamiento <- indice_reclutamiento %>%
 ```
 
 
-```{r fig.height=2, fig.width=9}
+Figure \@ref(fig:Figure2) show recruit index by strata.
+
+```{r Figure2, fig.height=2, fig.width=9, fig.cap="Krill Recruit index by strata"}
 ggplot(indice_reclutamiento %>% 
          filter(ID !="Outer"),
        aes(x = Year, y = PROPLOG2, fill = color_index)) +
@@ -197,12 +203,11 @@ $\begin{aligned} r = 1- \frac{6\sum_{i=1}^n D_{i}^n}{n (n^2 - 1)}\end{aligned}$
 
 
 ```{r}
-# Seleccionar las columnas que son numéricas y calcular la correlación
 data_corr <- data_completa %>%
-  dplyr::select(-ID, -color_index) %>%  # Elimina las variables no numéricas
-  # Asegurarse de que todas las columnas sean numéricas
-  dplyr::mutate(across(where(is.character), as.numeric)) %>%
-  cor(method = "pearson", use = "complete.obs")  # Calcula la correlación excluyendo NA
+  dplyr::select(-ID, -color_index) %>% 
+  dplyr::mutate(across(where(is.character),
+                       as.numeric)) %>%
+  cor(method = "pearson", use = "complete.obs") 
 ```
 
 
@@ -329,7 +334,9 @@ data_lag <- data_modelo %>%
 mod5_R_lag <- glm(PROPLOG2 ~ ID + Year + seaice_lag + tsm_lag * Chla_lag, data = data_lag)
 ```
 
-## Results
+\pagebreak
+
+# Results
 
 ```{r}
 model_comparison <- compare_performance(mod1_R, 
@@ -367,9 +374,8 @@ plot(compare_performance(mod1_R,
 
 ```
 
-In our *best model* `mod5_L` we fitted a linear mixed model (estimated using ML and nloptwrap optimizer) to
-predict `LENGTH` with `ID`, `seaice`, `tsm` and `Chla` (formula: LENGTH ~ ID + seaice + tsm * Chla). The model included Year as random effect (formula: ~1 | Year). The model's total explanatory power is substantial (conditional R2 = 0.82) and the part related to the fixed effects alone (marginal R2) is of 0.41. The model's intercept, corresponding to ID = BS, seaice = 0, tsm = 0 and Chla = 0, is at 5.02
-(95% CI [3.65, 6.39], t(51) = 7.36, p < .001). about colinearity, the effect of tsm × Chla is statistically non-significant and negative (beta = -0.11, 95% CI [-0.23, 7.00e-03], t(51) = -1.89, p = 0.064; Std. beta = -0.25, 95% CI [-0.52, 0.02])
+In our *best model* `mod2_R` we fitted a linear mixed model (estimated using ML and nloptwrap optimizer) to
+predict `Recruit` with `ID`, `seaice`, `tsm` and `Chla`.
 
 ```{r}
 tabla_coef <- broom::tidy(mod2_R)
@@ -428,15 +434,16 @@ data_large3 <- data_completa %>%
 ```
 
 
-```{r fig.height=4, fig.width=5}
+```{r Figure6, fig.height=4, fig.width=6, out.width="75%"}
 ggplot(data_large3 %>% 
          filter(Year > 2000,
                 ID == "BS"), aes(x = Chla, y = PROPLOG2)) +
   geom_point(size = 3, 
              alpha = 0.7, 
              aes(color = as.factor(Year))) +  
-  geom_smooth(method = "lm", se = FALSE, color = "black") +  
-  stat_cor(method = "pearson", label.x.npc = "left") +  # Añade R en cada facet
+  geom_smooth(method = "lm", se = TRUE, color = "black") +  
+  stat_cor(method = "pearson",
+           label.y.npc = "bottom") +
   #facet_wrap(~ID, scales = "free", ncol=5) +  
   theme_minimal() +  
   scale_color_viridis_d(option="F",
@@ -447,7 +454,9 @@ ggplot(data_large3 %>%
        color = "Año")
 ```
 
+Figure \@ref(fig:Figure4) show negative relation between recruit index and Chl-a.
 
+\pagebreak
 
 # Conclusion
 
@@ -468,11 +477,13 @@ Additionally, our results corroborate the influence of environmental variables o
 
 Overall, these findings demonstrate that krill population structure is shaped not only by fishing pressure but also by environmental conditions. By incorporating these environmental components into stock assessment models, we enhance our understanding of krill population dynamics in the Antarctic Peninsula, particularly in Subarea 48.1, and improve the ecological realism of predictive models such as LBSPR.
 
-
+\pagebreak
 
 # Code Repository
 
 The data, codes and other documents of this analysis can be found in the following link [Environment and Krill Recruit relation](https://github.com/MauroMardones/Krill_recruit_env)
+
+\pagebreak
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 title: "Supporting Information 2"
-subtitle: "Environmental and Predation Factors on the Population Dynamics of Antarctic Krill (*Euphausia superba*) from an Integrated Catch-at-Length Model Perspective"
-author: "Mardones, M; Jarvis Mason, E.T.;  Santa Cruz, F.; Pinones, A.; Cárdenas, C.A"
-date:  "07 April, 2025"
+subtitle: "Code and analysis for identifying environmental influences on krill length using correlation and mixed-effects models across spatial and temporal scales"
+#author: "Mardones, M; Jarvis Mason, E.T.;  Santa Cruz, F.; Pinones, A.; Cárdenas, C.A"
+date:  "31 May, 2025"
 bibliography: envrecr.bib
 csl: apa.csl
 link-citations: yes
@@ -23,87 +23,53 @@ output:
     self-contained: true
     code-tools: true
     number_sections: false
+    always_allow_html: true
 editor_options: 
   markdown: 
     wrap: 72
 ---
 
+\pagebreak
 
 
 
 
 
 
-``` r
-library(here)
-#analisis
-library(ggsignif)
-library(ggrepel)
-library(ggpubr)
-#library(inlmisc)
-library(nortest) #para testear distribucion
-library(easystats) # multiples unciones analiticas
-library(lme4)
-library(readxl)
-library(fitdistrplus)
-# vizualizacion
-library(ggridges)
-library(sf)
-library(GGally)
-library(tidyverse, quietly = TRUE)
-library(knitr, quietly = TRUE)
-library(kableExtra)
-library(egg)
-library(ggthemes)
-library(sjPlot)
-library(CCAMLRGIS)
-library(tinytable)
-library(ggcorrplot)
-library(broom)
-```
 
+
+\pagebreak
 
 # Background
 
-This study aims to explore the relationship between environmental variables and the population dynamics of krill (*Euphausia superba*), incorporating spatial complexity and biological components such as length data from fishery monitoring. By using lineal models, we assess how environmental factors influence krill recruit across different strata, considering both spatial and temporal scales.  By identifying correlations between environmental variables and population or fishery indicators, this study also aims to establish a time series of key environmental factors for potential integration into stock assessment models. This approach follows similar methodologies to @Wang2021, but applied to a longer fishery time series.  
+This study aims to explore the relationship between environmental variables and the population dynamics of krill (*Euphausia superba*), incorporating spatial complexity and biological components such as length data from fishery monitoring. By using lineal models, we assess how environmental factors influence krill recruit across different strata, considering both spatial and temporal scales.  By identifying correlations between environmental variables and population or fishery indicators, this study also aims to establish a time series of key environmental factors for potential integration into stock assessment models. This approach follows similar methodologies to @Wang2021, but applied to a longer fishery time series.  Our main research question concerns the effects of distinct physical and oceanographic factors in the Southern Ocean on krill population structure. Specifically, we examine whether environmental variability drives changes in krill recruit within the fishery, influencing population dynamics across spatial and temporal dimensions.  
 
-# Hypothesis
-
-Our main research question concerns the effects of distinct physical and oceanographic factors in the Southern Ocean on krill population structure. Specifically, we examine whether environmental variability drives changes in krill recruit within the fishery, influencing population dynamics across spatial and temporal dimensions.  
-
+\pagebreak
 
 # Methodology
 
 ## Spatial heterogeneity 
 
-Figure \@ref(fig:Figure1) (S2 Fig 1 now) illustrates the spatial heterogeneity of key environmental and population variables across different management units (BS, EI, GS, JOIN, SSWI) in the Antarctic Peninsula, where krill populations are distributed. Biomass and catch trends show substantial variability between strata, with BS and GS exhibiting the highest biomass estimates, whereas JOIN and SSWI display comparatively lower values. Catch levels also differ significantly, with BS and GS experiencing the most intensive exploitation, while SSWI and JOIN have minimal catch records.  Environmental variables further highlight this heterogeneity. Sea surface temperature (SST) trends vary among strata, with GS and JOIN exhibiting a slight warming trend over time, while BS and EI remain relatively stable. Sea ice cover differs substantially, with GS showing consistently high coverage, whereas JOIN presents greater fluctuations. Chlorophyll-a (Chl-a) levels, a proxy for primary productivity, also vary across regions, with BS and GS showing declining trends, while EI and SSWI remain relatively stable at lower concentrations.  Given these spatial differences in both krill population metrics and environmental conditions, it is essential to analyze and estimate SPR at this local scale. The observed heterogeneity supports the need for spatially explicit management, as krill population dynamics are likely influenced by regional environmental drivers. By incorporating SPR analysis at this resolution, we can provide a spatial explicit framework for sustainable krill management, ensuring that conservation efforts align with local population and ecosystem characteristics.
+Figure \@ref(fig:Figure1) illustrates the spatial heterogeneity of key environmental and population variables across different management units (BS, EI, GS, JOIN, SSWI) in the Antarctic Peninsula, where krill populations are distributed. Biomass and catch trends show substantial variability between strata, with BS and GS exhibiting the highest biomass estimates, whereas JOIN and SSWI display comparatively lower values. Catch levels also differ significantly, with BS and GS experiencing the most intensive exploitation, while SSWI and JOIN have minimal catch records.  Environmental variables further highlight this heterogeneity. Sea surface temperature (SST) trends vary among strata, with GS and JOIN exhibiting a slight warming trend over time, while BS and EI remain relatively stable. Sea ice cover differs substantially, with GS showing consistently high coverage, whereas JOIN presents greater fluctuations. Chlorophyll-a (Chl-a) levels, a proxy for primary productivity, also vary across regions, with BS and GS showing declining trends, while EI and SSWI remain relatively stable at lower concentrations.  Given these spatial differences in both krill population metrics and environmental conditions, it is essential to analyze and estimate SPR at this local scale. The observed heterogeneity supports the need for spatially explicit management, as krill population dynamics are likely influenced by regional environmental drivers. By incorporating SPR analysis at this resolution, we can provide a spatial explicit framework for sustainable krill management, ensuring that conservation efforts align with local population and ecosystem characteristics.
 
 <div class="figure" style="text-align: center">
-<img src="index_files/figure-html/var_env.png" alt="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)" width="70%" />
+<img src="index_files/figure-html/var_env.png" alt="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)" width="90%" />
 <p class="caption">(\#fig:Figure1)Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)</p>
 </div>
 
-## Length composition data as indicator of krill dynamics
+## Length composition data as indicator of recruitment 
 
-
-``` r
-#Load data procesed
-load("~/DOCAS/Data/Kril Env Recruit/data/sf4_nochina.RData")
-data_large2 <- read_csv("data/datapost_LBSPR.csv")
-```
+This analysis was made follow @Perry2020 method.
 
 
 
-``` r
-sf5 <- as.data.frame(sf4) %>% 
-  dplyr::select(1, 10, 11)
-```
 
-Here’s how you can describe the methodology for calculating the krill recruitment index in a scientific paper, with the terms explained in English:
 
-The recruitment index is calculated by first determining the proportion of juvenile krill individuals based on their total length, specifically those under a threshold of 3.6 cm. This proportion is calculated as the ratio of juvenile individuals to the total number of krill sampled within a given year and for each identified group (ID). The resulting proportion is then transformed using a logarithmic function to obtain the variable **PROPLOG**, which represents the log-transformed recruitment index.
 
-Next, the **PROPLOG** values are standardized to fall within a specific range, typically between -1 and 1. This standardization process is achieved by applying the following equation:
+
+The recruitment index is calculated by first determining the proportion of juvenile krill individuals based on their total length, specifically those under a threshold of 3.6 cm. This proportion is calculated as the ratio of juvenile individuals to the total number of krill sampled within a given year and for each identified group (ID). The resulting proportion is then transformed using a logarithmic function of length, which represents the log-transformed recruitment index.
+
+Next, the *PROPLOG* values are standardized to fall within a specific range, typically between -1 and 1. This standardization process is achieved by applying the following equation:
 
 \[
 \text{PROPLOG2} = \frac{\text{PROPLOG} - \text{min}(\text{PROPLOG})}{\text{max}(\text{PROPLOG}) - \text{min}(\text{PROPLOG})} \times (b - a) + a
@@ -123,52 +89,56 @@ This methodology ensures that the recruitment index is both consistent and compa
 
 ``` r
 indice_reclutamiento <- sf5 %>%
-  filter(length_total_cm < 3.6) %>%
-  group_by(Year, ID) %>%
-  summarise(PROP = n() / nrow(sf5), .groups = "drop") %>%
-  mutate(PROPLOG = log(PROP))
+    filter(length_total_cm < 3.6) %>%
+    group_by(Year, ID) %>%
+    summarise(PROP = n()/nrow(sf5), .groups = "drop") %>%
+    mutate(PROPLOG = log(PROP))
 
-# Paso 2: Estandarizar el índice logarítmico entre -1 y 1
+# Paso 2: Estandarizar el índice logarítmico entre -1
+# y 1
 a <- -1
 b <- 1
 min_x <- min(indice_reclutamiento$PROPLOG, na.rm = TRUE)
 max_x <- max(indice_reclutamiento$PROPLOG, na.rm = TRUE)
 
 indice_reclutamiento <- indice_reclutamiento %>%
-  mutate(PROPLOG2 = ((PROPLOG - min_x) / (max_x - min_x)) * (b - a) + a)
+    mutate(PROPLOG2 = ((PROPLOG - min_x)/(max_x - min_x)) *
+        (b - a) + a)
 
 indice_reclutamiento <- indice_reclutamiento %>%
-  mutate(color_index = ifelse(PROPLOG2 >= 0, "positive", "negative"))
+    mutate(color_index = ifelse(PROPLOG2 >= 0, "positive",
+        "negative"))
 ```
 
+
+Figure \@ref(fig:Figure2) show recruit index by strata.
 
 
 ``` r
-ggplot(indice_reclutamiento %>% 
-         filter(ID !="Outer"),
-       aes(x = Year, y = PROPLOG2, fill = color_index)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~ ID, ncol = 5) +
-  scale_fill_manual(values = c("positive" = "red", "negative" = "black")) +
-  labs(title = "", y = "Recruit Index", x = "", fill = "") +
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        axis.text = element_text(size=7),
-        legend.position = "none")
+ggplot(indice_reclutamiento %>%
+    filter(ID != "Outer"), aes(x = Year, y = PROPLOG2, fill = color_index)) +
+    geom_col(position = "dodge") + facet_wrap(~ID, ncol = 5) +
+    scale_fill_manual(values = c(positive = "red", negative = "black")) +
+    labs(title = "", y = "Recruit Index", x = "", fill = "") +
+    theme_bw() + theme(axis.text.x = element_text(angle = 90,
+    hjust = 1), axis.text = element_text(size = 7), legend.position = "none")
 ```
 
-<img src="index_files/figure-html/unnamed-chunk-4-1.jpeg" style="display: block; margin: auto;" />
+<div class="figure" style="text-align: center">
+<img src="index_files/figure-html/Figure2-1.jpeg" alt="Krill Recruit index by strata"  />
+<p class="caption">(\#fig:Figure2)Krill Recruit index by strata</p>
+</div>
 
 
 ``` r
 data_large2 <- data_large2 %>%
-  rename(Year = ANO)
+    rename(Year = ANO)
 
 # Paso 2: Unir por ID y Year
-data_completa <- left_join(data_large2, 
-                           indice_reclutamiento, 
-                           by = c("ID", "Year"))
-#saveRDS(data_completa, "data/Data_recruit_env.Rdata")
+data_completa <- left_join(data_large2, indice_reclutamiento,
+    by = c("ID", "Year"))
+# saveRDS(data_completa,
+# 'data/Data_recruit_env.Rdata')
 ```
 
 
@@ -193,22 +163,18 @@ $\begin{aligned} r = 1- \frac{6\sum_{i=1}^n D_{i}^n}{n (n^2 - 1)}\end{aligned}$
 
 
 ``` r
-# Seleccionar las columnas que son numéricas y calcular la correlación
 data_corr <- data_completa %>%
-  dplyr::select(-ID, -color_index) %>%  # Elimina las variables no numéricas
-  # Asegurarse de que todas las columnas sean numéricas
-  dplyr::mutate(across(where(is.character), as.numeric)) %>%
-  cor(method = "pearson", use = "complete.obs")  # Calcula la correlación excluyendo NA
+    dplyr::select(-ID, -color_index) %>%
+    dplyr::mutate(across(where(is.character), as.numeric)) %>%
+    cor(method = "pearson", use = "complete.obs")
 ```
 
 
 
 ``` r
-ggcorrplot(data_corr, method = "circle", 
-           type = "lower", 
-           colors = c("green", "white", "yellow"),
-           lab = TRUE, outline.col = "white", 
-           ggtheme = theme_minimal())
+ggcorrplot(data_corr, method = "circle", type = "lower",
+    colors = c("green", "white", "yellow"), lab = TRUE,
+    outline.col = "white", ggtheme = theme_minimal())
 ```
 
 <div class="figure" style="text-align: center">
@@ -234,17 +200,14 @@ To explore the distribution of numerical variables in our dataset, we conducted 
 
 ``` r
 data_filtered2 <- data_large2 %>%
-  dplyr::select(-ID, -Year, -`SE SPR`, -cvto) %>%
-  pivot_longer(cols = everything(), 
-               names_to = "Variable", values_to = "Valor")
+    dplyr::select(-ID, -Year, -`SE SPR`, -cvto) %>%
+    pivot_longer(cols = everything(), names_to = "Variable",
+        values_to = "Valor")
 
-ggplot(data_filtered2, aes(x = Valor)) +
-  geom_histogram(bins = 30, fill = "skyblue", color = "black", alpha = 0.7) +
-  facet_wrap(~Variable, scales = "free") +
-  theme_minimal() +
-  labs(title = "Variable distribution",
-       x = "",
-       y = "Frecuency")
+ggplot(data_filtered2, aes(x = Valor)) + geom_histogram(bins = 30,
+    fill = "skyblue", color = "black", alpha = 0.7) + facet_wrap(~Variable,
+    scales = "free") + theme_minimal() + labs(title = "Variable distribution",
+    x = "", y = "Frecuency")
 ```
 
 <div class="figure" style="text-align: center">
@@ -300,14 +263,11 @@ This represents each model in mathematical terms, where \(\beta\) are the coeffi
 
 
 ``` r
-# Prepara los datos
-# Base filtrada y normalizada
+# Prepara los datos Base filtrada y normalizada
 data_modelo <- data_completa %>%
-  drop_na(PROPLOG2, Chla, tsm, seaice) %>%
-  filter(Year > 1999) %>%
-  mutate(tsm = scale(tsm),
-         Chla = scale(Chla),
-         seaice = scale(seaice))
+    drop_na(PROPLOG2, Chla, tsm, seaice) %>%
+    filter(Year > 1999) %>%
+    mutate(tsm = scale(tsm), Chla = scale(Chla), seaice = scale(seaice))
 
 # Modelo 1: Solo ID
 mod1_R <- glm(PROPLOG2 ~ ID + Year, data = data_modelo)
@@ -319,53 +279,45 @@ mod2_R <- glm(PROPLOG2 ~ ID + Year + Chla, data = data_modelo)
 mod3_R <- glm(PROPLOG2 ~ ID + Year + Chla + tsm, data = data_modelo)
 
 # Modelo 4: ID + Chla + tsm + seaice
-mod4_R <- glm(PROPLOG2 ~ ID + Year + Chla + tsm + seaice, data = data_modelo)
+mod4_R <- glm(PROPLOG2 ~ ID + Year + Chla + tsm + seaice,
+    data = data_modelo)
 
 # Modelo 5: ID + seaice + interacción tsm * Chla
-mod5_R <- glm(PROPLOG2 ~ ID + Year + seaice + tsm * Chla, data = data_modelo)
+mod5_R <- glm(PROPLOG2 ~ ID + Year + seaice + tsm * Chla,
+    data = data_modelo)
 
 # Crear variables con retardo temporal (lag 1 año)
 data_lag <- data_modelo %>%
-  arrange(ID, Year) %>%
-  group_by(ID) %>%
-  mutate(tsm_lag = lag(tsm, 1),
-         Chla_lag = lag(Chla, 1),
-         seaice_lag = lag(seaice, 1)) %>%
-  ungroup() %>%
-  drop_na(tsm_lag, Chla_lag, seaice_lag)
+    arrange(ID, Year) %>%
+    group_by(ID) %>%
+    mutate(tsm_lag = lag(tsm, 1), Chla_lag = lag(Chla, 1),
+        seaice_lag = lag(seaice, 1)) %>%
+    ungroup() %>%
+    drop_na(tsm_lag, Chla_lag, seaice_lag)
 
 # Modelo 5 con retardo
-mod5_R_lag <- glm(PROPLOG2 ~ ID + Year + seaice_lag + tsm_lag * Chla_lag, data = data_lag)
+mod5_R_lag <- glm(PROPLOG2 ~ ID + Year + seaice_lag + tsm_lag *
+    Chla_lag, data = data_lag)
 ```
 
-## Results
+\pagebreak
+
+# Results
 
 
 ``` r
-model_comparison <- compare_performance(mod1_R, 
-                                        mod2_R, 
-                                        mod3_R,
-                                        mod4_R, 
-                                        mod5_R,
-                                        mod5_R_lag,
-                                        rank = TRUE,
-                                        verbose = FALSE)
+model_comparison <- compare_performance(mod1_R, mod2_R,
+    mod3_R, mod4_R, mod5_R, mod5_R_lag, rank = TRUE, verbose = FALSE)
 
 model_comparison %>%
-  kable(format = "html", 
-        digits = 3, 
-        align = "c", 
-        caption = "Model Performance Comparison") %>%
-  kable_styling(full_width = TRUE, 
-                bootstrap_options = c("striped", 
-                                      "hover", 
-                                      "condensed",
-                                      "responsive")) %>%
-  scroll_box(width = "100%", height = "400px")
+    kable(format = "html", digits = 3, align = "c", caption = "Model Performance Comparison") %>%
+    kable_styling(full_width = TRUE, bootstrap_options = c("striped",
+        "hover", "condensed", "responsive")) %>%
+    scroll_box(width = "100%", height = "400px")
 ```
 
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover table-condensed table-responsive" style="color: black; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:unnamed-chunk-8)Model Performance Comparison</caption>
+<caption>(\#tab:unnamed-chunk-7)Model Performance Comparison</caption>
  <thead>
   <tr>
    <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> Name </th>
@@ -452,14 +404,8 @@ The Figure \@ref(fig:Figure5) show graphically the performance in the models.
 
 
 ``` r
-plot(compare_performance(mod1_R, 
-                          mod2_R, 
-                          mod3_R,
-                                        mod4_R, 
-                                        mod5_R,
-                         mod5_R_lag,
-                    rank=TRUE,
-                    verbose = FALSE))
+plot(compare_performance(mod1_R, mod2_R, mod3_R, mod4_R,
+    mod5_R, mod5_R_lag, rank = TRUE, verbose = FALSE))
 ```
 
 <div class="figure" style="text-align: center">
@@ -467,9 +413,8 @@ plot(compare_performance(mod1_R,
 <p class="caption">(\#fig:Figure5)Comparision the performance and quality of several models</p>
 </div>
 
-In our *best model* `mod5_L` we fitted a linear mixed model (estimated using ML and nloptwrap optimizer) to
-predict `LENGTH` with `ID`, `seaice`, `tsm` and `Chla` (formula: LENGTH ~ ID + seaice + tsm * Chla). The model included Year as random effect (formula: ~1 | Year). The model's total explanatory power is substantial (conditional R2 = 0.82) and the part related to the fixed effects alone (marginal R2) is of 0.41. The model's intercept, corresponding to ID = BS, seaice = 0, tsm = 0 and Chla = 0, is at 5.02
-(95% CI [3.65, 6.39], t(51) = 7.36, p < .001). about colinearity, the effect of tsm × Chla is statistically non-significant and negative (beta = -0.11, 95% CI [-0.23, 7.00e-03], t(51) = -1.89, p = 0.064; Std. beta = -0.25, 95% CI [-0.52, 0.02])
+In our *best model* `mod2_R` we fitted a linear mixed model (estimated using ML and nloptwrap optimizer) to
+predict `Recruit` with `ID`, `seaice`, `tsm` and `Chla`.
 
 
 ``` r
@@ -477,18 +422,19 @@ tabla_coef <- broom::tidy(mod2_R)
 
 # Redondear columnas numéricas
 tabla_coef <- tabla_coef %>%
-  mutate(across(where(is.numeric), round, 4))
+    mutate(across(where(is.numeric), round, 4))
 
 # Crear tabla HTML
 tabla_coef %>%
-  kable(format = "html", escape = FALSE,
-        caption = "Summary of GLM model for PROPLOG2",
-        col.names = c("Term", "Estimate", "Std. Error", "t value", "Pr(>|t|)")) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+    kable(format = "html", escape = FALSE, caption = "Summary of GLM model for PROPLOG2",
+        col.names = c("Term", "Estimate", "Std. Error",
+            "t value", "Pr(>|t|)")) %>%
+    kable_styling(full_width = FALSE, bootstrap_options = c("striped",
+        "hover", "condensed"))
 ```
 
 <table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:unnamed-chunk-9)Summary of GLM model for PROPLOG2</caption>
+<caption>(\#tab:unnamed-chunk-8)Summary of GLM model for PROPLOG2</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Term </th>
@@ -573,36 +519,30 @@ In summary, the model suggests that `IDEI`, `IDJOIN`, and `Chla` have significan
 
 ``` r
 data_large3 <- data_completa %>%
-  arrange(ID, Year) %>%  
-  group_by(ID) %>%
-  mutate(SPR_lag = lag(SPR)) %>%
-  ungroup()
+    arrange(ID, Year) %>%
+    group_by(ID) %>%
+    mutate(SPR_lag = lag(SPR)) %>%
+    ungroup()
 ```
 
 
 
 ``` r
-ggplot(data_large3 %>% 
-         filter(Year > 2000,
-                ID == "BS"), aes(x = Chla, y = PROPLOG2)) +
-  geom_point(size = 3, 
-             alpha = 0.7, 
-             aes(color = as.factor(Year))) +  
-  geom_smooth(method = "lm", se = FALSE, color = "black") +  
-  stat_cor(method = "pearson", label.x.npc = "left") +  # Añade R en cada facet
-  #facet_wrap(~ID, scales = "free", ncol=5) +  
-  theme_minimal() +  
-  scale_color_viridis_d(option="F",
-                        name="") +  
-  labs(title = "",
-       x = "Chl-a",
-       y = "Recruit Index",
-       color = "Año")
+ggplot(data_large3 %>%
+    filter(Year > 2000, ID == "BS"), aes(x = Chla, y = PROPLOG2)) +
+    geom_point(size = 3, alpha = 0.7, aes(color = as.factor(Year))) +
+    geom_smooth(method = "lm", se = TRUE, color = "black") +
+    stat_cor(method = "pearson", label.y.npc = "bottom") +
+    # facet_wrap(~ID, scales = 'free', ncol=5) +
+theme_minimal() + scale_color_viridis_d(option = "F", name = "") +
+    labs(title = "", x = "Chl-a", y = "Recruit Index", color = "Año")
 ```
 
-<img src="index_files/figure-html/unnamed-chunk-11-1.jpeg" style="display: block; margin: auto;" />
+<img src="index_files/figure-html/Figure6-1.jpeg" width="75%" style="display: block; margin: auto;" />
 
+Figure \@ref(fig:Figure4) show negative relation between recruit index and Chl-a.
 
+\pagebreak
 
 # Conclusion
 
@@ -623,11 +563,13 @@ Additionally, our results corroborate the influence of environmental variables o
 
 Overall, these findings demonstrate that krill population structure is shaped not only by fishing pressure but also by environmental conditions. By incorporating these environmental components into stock assessment models, we enhance our understanding of krill population dynamics in the Antarctic Peninsula, particularly in Subarea 48.1, and improve the ecological realism of predictive models such as LBSPR.
 
-
+\pagebreak
 
 # Code Repository
 
 The data, codes and other documents of this analysis can be found in the following link [Environment and Krill Recruit relation](https://github.com/MauroMardones/Krill_recruit_env)
+
+\pagebreak
 
 # References
 
