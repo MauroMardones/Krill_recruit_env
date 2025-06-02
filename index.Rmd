@@ -8,7 +8,7 @@ csl: apa.csl
 link-citations: yes
 linkcolor: blue
 output:
-  bookdown::html_document2:
+  bookdown::pdf_document2:
     fig_caption: yes
     keep_md: true
     toc: true
@@ -349,7 +349,7 @@ model_comparison <- compare_performance(mod1_R,
                                         verbose = FALSE)
 
 model_comparison %>%
-  kable(format = "html", 
+  kable(format = "latex", 
         digits = 3, 
         align = "c", 
         caption = "Model Performance Comparison") %>%
@@ -386,7 +386,7 @@ tabla_coef <- tabla_coef %>%
 
 # Crear tabla HTML
 tabla_coef %>%
-  kable(format = "html", escape = FALSE,
+  kable(format = "latex", escape = FALSE,
         caption = "Summary of GLM model for PROPLOG2",
         col.names = c("Term", "Estimate", "Std. Error", "t value", "Pr(>|t|)")) %>%
   kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
@@ -433,8 +433,9 @@ data_large3 <- data_completa %>%
   ungroup()
 ```
 
+Figure \@ref(fig:Figure6) show negative relation between recruit index and Chl-a.
 
-```{r Figure6, fig.height=4, fig.width=6, out.width="75%"}
+```{r Figure6, fig.height=4, fig.width=6, out.width="75%", fig.cap= "Relationship between mean annual chlorophyll-a concentration (Chl-a) and the standardized krill recruit index across years (2001-2022). Each point represents a year and is color-coded accordingly. The black line represents a linear regression fit with a 95% confidence interval (shaded area). A significant negative correlation was found between Chl-a and the recruit index (*R* = - 0.58, *p* = 0.018)"}
 ggplot(data_large3 %>% 
          filter(Year > 2000,
                 ID == "BS"), aes(x = Chla, y = PROPLOG2)) +
@@ -454,7 +455,7 @@ ggplot(data_large3 %>%
        color = "Año")
 ```
 
-Figure \@ref(fig:Figure4) show negative relation between recruit index and Chl-a.
+
 
 \pagebreak
 

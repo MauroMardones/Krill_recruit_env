@@ -2,13 +2,13 @@
 title: "Supporting Information 2"
 subtitle: "Code and analysis for identifying environmental influences on krill length using correlation and mixed-effects models across spatial and temporal scales"
 #author: "Mardones, M; Jarvis Mason, E.T.;  Santa Cruz, F.; Pinones, A.; Cárdenas, C.A"
-date:  "31 May, 2025"
+date:  "02 June, 2025"
 bibliography: envrecr.bib
 csl: apa.csl
 link-citations: yes
 linkcolor: blue
 output:
-  bookdown::html_document2:
+  bookdown::pdf_document2:
     fig_caption: yes
     keep_md: true
     toc: true
@@ -52,10 +52,14 @@ This study aims to explore the relationship between environmental variables and 
 
 Figure \@ref(fig:Figure1) illustrates the spatial heterogeneity of key environmental and population variables across different management units (BS, EI, GS, JOIN, SSWI) in the Antarctic Peninsula, where krill populations are distributed. Biomass and catch trends show substantial variability between strata, with BS and GS exhibiting the highest biomass estimates, whereas JOIN and SSWI display comparatively lower values. Catch levels also differ significantly, with BS and GS experiencing the most intensive exploitation, while SSWI and JOIN have minimal catch records.  Environmental variables further highlight this heterogeneity. Sea surface temperature (SST) trends vary among strata, with GS and JOIN exhibiting a slight warming trend over time, while BS and EI remain relatively stable. Sea ice cover differs substantially, with GS showing consistently high coverage, whereas JOIN presents greater fluctuations. Chlorophyll-a (Chl-a) levels, a proxy for primary productivity, also vary across regions, with BS and GS showing declining trends, while EI and SSWI remain relatively stable at lower concentrations.  Given these spatial differences in both krill population metrics and environmental conditions, it is essential to analyze and estimate SPR at this local scale. The observed heterogeneity supports the need for spatially explicit management, as krill population dynamics are likely influenced by regional environmental drivers. By incorporating SPR analysis at this resolution, we can provide a spatial explicit framework for sustainable krill management, ensuring that conservation efforts align with local population and ecosystem characteristics.
 
-<div class="figure" style="text-align: center">
-<img src="index_files/figure-html/var_env.png" alt="Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)" width="90%" />
-<p class="caption">(\#fig:Figure1)Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)</p>
-</div>
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.9\linewidth]{index_files/figure-html/var_env} 
+
+}
+
+\caption{Spatial heterogeneity of krill biomass, catch, and environmental variables across management units in the Antarctic Peninsula (BS, EI, GS, JOIN, SSWI)}(\#fig:Figure1)
+\end{figure}
 
 ## Length composition data as indicator of recruitment 
 
@@ -124,10 +128,14 @@ ggplot(indice_reclutamiento %>%
     hjust = 1), axis.text = element_text(size = 7), legend.position = "none")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="index_files/figure-html/Figure2-1.jpeg" alt="Krill Recruit index by strata"  />
-<p class="caption">(\#fig:Figure2)Krill Recruit index by strata</p>
-</div>
+\begin{figure}[H]
+
+{\centering \includegraphics{index_files/figure-latex/Figure2-1} 
+
+}
+
+\caption{Krill Recruit index by strata}(\#fig:Figure2)
+\end{figure}
 
 
 ``` r
@@ -177,10 +185,14 @@ ggcorrplot(data_corr, method = "circle", type = "lower",
     outline.col = "white", ggtheme = theme_minimal())
 ```
 
-<div class="figure" style="text-align: center">
-<img src="index_files/figure-html/Figure3-1.jpeg" alt="Coorrelation plot to different variables."  />
-<p class="caption">(\#fig:Figure3)Coorrelation plot to different variables.</p>
-</div>
+\begin{figure}[H]
+
+{\centering \includegraphics{index_files/figure-latex/Figure3-1} 
+
+}
+
+\caption{Coorrelation plot to different variables.}(\#fig:Figure3)
+\end{figure}
 
 
 The correlation matrix provides valuable insights into the relationships among the variables (Figure \@ref(fig:Figure3)):  
@@ -210,10 +222,14 @@ ggplot(data_filtered2, aes(x = Valor)) + geom_histogram(bins = 30,
     x = "", y = "Frecuency")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="index_files/figure-html/Figure4-1.jpeg" alt="Distribution of numerical variables to test assumtion of regresion models" width="80%" />
-<p class="caption">(\#fig:Figure4)Distribution of numerical variables to test assumtion of regresion models</p>
-</div>
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\linewidth]{index_files/figure-latex/Figure4-1} 
+
+}
+
+\caption{Distribution of numerical variables to test assumtion of regresion models}(\#fig:Figure4)
+\end{figure}
 
 ## Models
 
@@ -310,96 +326,34 @@ model_comparison <- compare_performance(mod1_R, mod2_R,
     mod3_R, mod4_R, mod5_R, mod5_R_lag, rank = TRUE, verbose = FALSE)
 
 model_comparison %>%
-    kable(format = "html", digits = 3, align = "c", caption = "Model Performance Comparison") %>%
+    kable(format = "latex", digits = 3, align = "c", caption = "Model Performance Comparison") %>%
     kable_styling(full_width = TRUE, bootstrap_options = c("striped",
         "hover", "condensed", "responsive")) %>%
     scroll_box(width = "100%", height = "400px")
 ```
 
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover table-condensed table-responsive" style="color: black; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:unnamed-chunk-7)Model Performance Comparison</caption>
- <thead>
-  <tr>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> Name </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> Model </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> R2 </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> RMSE </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> Sigma </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> AIC_wt </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> AICc_wt </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> BIC_wt </th>
-   <th style="text-align:center;position: sticky; top:0; background-color: #FFFFFF;"> Performance_Score </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:center;"> mod2_R </td>
-   <td style="text-align:center;"> glm </td>
-   <td style="text-align:center;"> 0.594 </td>
-   <td style="text-align:center;"> 0.383 </td>
-   <td style="text-align:center;"> 0.419 </td>
-   <td style="text-align:center;"> 0.405 </td>
-   <td style="text-align:center;"> 0.600 </td>
-   <td style="text-align:center;"> 0.574 </td>
-   <td style="text-align:center;"> 0.891 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> mod3_R </td>
-   <td style="text-align:center;"> glm </td>
-   <td style="text-align:center;"> 0.610 </td>
-   <td style="text-align:center;"> 0.375 </td>
-   <td style="text-align:center;"> 0.419 </td>
-   <td style="text-align:center;"> 0.279 </td>
-   <td style="text-align:center;"> 0.201 </td>
-   <td style="text-align:center;"> 0.196 </td>
-   <td style="text-align:center;"> 0.659 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> mod5_R </td>
-   <td style="text-align:center;"> glm </td>
-   <td style="text-align:center;"> 0.635 </td>
-   <td style="text-align:center;"> 0.363 </td>
-   <td style="text-align:center;"> 0.423 </td>
-   <td style="text-align:center;"> 0.102 </td>
-   <td style="text-align:center;"> 0.010 </td>
-   <td style="text-align:center;"> 0.018 </td>
-   <td style="text-align:center;"> 0.533 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> mod4_R </td>
-   <td style="text-align:center;"> glm </td>
-   <td style="text-align:center;"> 0.619 </td>
-   <td style="text-align:center;"> 0.370 </td>
-   <td style="text-align:center;"> 0.423 </td>
-   <td style="text-align:center;"> 0.145 </td>
-   <td style="text-align:center;"> 0.043 </td>
-   <td style="text-align:center;"> 0.051 </td>
-   <td style="text-align:center;"> 0.529 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> mod1_R </td>
-   <td style="text-align:center;"> glm </td>
-   <td style="text-align:center;"> 0.504 </td>
-   <td style="text-align:center;"> 0.423 </td>
-   <td style="text-align:center;"> 0.454 </td>
-   <td style="text-align:center;"> 0.055 </td>
-   <td style="text-align:center;"> 0.145 </td>
-   <td style="text-align:center;"> 0.157 </td>
-   <td style="text-align:center;"> 0.180 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> mod5_R_lag </td>
-   <td style="text-align:center;"> glm </td>
-   <td style="text-align:center;"> 0.528 </td>
-   <td style="text-align:center;"> 0.407 </td>
-   <td style="text-align:center;"> 0.486 </td>
-   <td style="text-align:center;"> 0.015 </td>
-   <td style="text-align:center;"> 0.001 </td>
-   <td style="text-align:center;"> 0.004 </td>
-   <td style="text-align:center;"> 0.074 </td>
-  </tr>
-</tbody>
-</table></div>
+\begin{table}
+\centering
+\caption{(\#tab:unnamed-chunk-7)Model Performance Comparison}
+\centering
+\begin{tabu} to \linewidth {>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X>{\centering}X}
+\hline
+Name & Model & R2 & RMSE & Sigma & AIC\_wt & AICc\_wt & BIC\_wt & Performance\_Score\\
+\hline
+mod2\_R & glm & 0.594 & 0.383 & 0.419 & 0.405 & 0.600 & 0.574 & 0.891\\
+\hline
+mod3\_R & glm & 0.610 & 0.375 & 0.419 & 0.279 & 0.201 & 0.196 & 0.659\\
+\hline
+mod5\_R & glm & 0.635 & 0.363 & 0.423 & 0.102 & 0.010 & 0.018 & 0.533\\
+\hline
+mod4\_R & glm & 0.619 & 0.370 & 0.423 & 0.145 & 0.043 & 0.051 & 0.529\\
+\hline
+mod1\_R & glm & 0.504 & 0.423 & 0.454 & 0.055 & 0.145 & 0.157 & 0.180\\
+\hline
+mod5\_R\_lag & glm & 0.528 & 0.407 & 0.486 & 0.015 & 0.001 & 0.004 & 0.074\\
+\hline
+\end{tabu}
+\end{table}
 The Figure \@ref(fig:Figure5) show graphically the performance in the models.
 
 
@@ -408,10 +362,14 @@ plot(compare_performance(mod1_R, mod2_R, mod3_R, mod4_R,
     mod5_R, mod5_R_lag, rank = TRUE, verbose = FALSE))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="index_files/figure-html/Figure5-1.jpeg" alt="Comparision the performance and quality of several models" width="80%" />
-<p class="caption">(\#fig:Figure5)Comparision the performance and quality of several models</p>
-</div>
+\begin{figure}[H]
+
+{\centering \includegraphics[width=0.8\linewidth]{index_files/figure-latex/Figure5-1} 
+
+}
+
+\caption{Comparision the performance and quality of several models}(\#fig:Figure5)
+\end{figure}
 
 In our *best model* `mod2_R` we fitted a linear mixed model (estimated using ML and nloptwrap optimizer) to
 predict `Recruit` with `ID`, `seaice`, `tsm` and `Chla`.
@@ -426,62 +384,33 @@ tabla_coef <- tabla_coef %>%
 
 # Crear tabla HTML
 tabla_coef %>%
-    kable(format = "html", escape = FALSE, caption = "Summary of GLM model for PROPLOG2",
+    kable(format = "latex", escape = FALSE, caption = "Summary of GLM model for PROPLOG2",
         col.names = c("Term", "Estimate", "Std. Error",
             "t value", "Pr(>|t|)")) %>%
     kable_styling(full_width = FALSE, bootstrap_options = c("striped",
         "hover", "condensed"))
 ```
 
-<table class="table table-striped table-hover table-condensed" style="color: black; width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>(\#tab:unnamed-chunk-8)Summary of GLM model for PROPLOG2</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Term </th>
-   <th style="text-align:right;"> Estimate </th>
-   <th style="text-align:right;"> Std. Error </th>
-   <th style="text-align:right;"> t value </th>
-   <th style="text-align:right;"> Pr(&gt;|t|) </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> (Intercept) </td>
-   <td style="text-align:right;"> -26.0863 </td>
-   <td style="text-align:right;"> 30.8799 </td>
-   <td style="text-align:right;"> -0.8448 </td>
-   <td style="text-align:right;"> 0.4063 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> IDEI </td>
-   <td style="text-align:right;"> -2.6355 </td>
-   <td style="text-align:right;"> 0.8193 </td>
-   <td style="text-align:right;"> -3.2167 </td>
-   <td style="text-align:right;"> 0.0036 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> IDJOIN </td>
-   <td style="text-align:right;"> -1.6326 </td>
-   <td style="text-align:right;"> 0.3821 </td>
-   <td style="text-align:right;"> -4.2721 </td>
-   <td style="text-align:right;"> 0.0002 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Year </td>
-   <td style="text-align:right;"> 0.0136 </td>
-   <td style="text-align:right;"> 0.0153 </td>
-   <td style="text-align:right;"> 0.8881 </td>
-   <td style="text-align:right;"> 0.3830 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chla </td>
-   <td style="text-align:right;"> -0.9401 </td>
-   <td style="text-align:right;"> 0.3997 </td>
-   <td style="text-align:right;"> -2.3521 </td>
-   <td style="text-align:right;"> 0.0268 </td>
-  </tr>
-</tbody>
-</table>
+\begin{table}
+\centering
+\caption{(\#tab:unnamed-chunk-8)Summary of GLM model for PROPLOG2}
+\centering
+\begin{tabular}[t]{l|r|r|r|r}
+\hline
+Term & Estimate & Std. Error & t value & Pr(>|t|)\\
+\hline
+(Intercept) & -26.0863 & 30.8799 & -0.8448 & 0.4063\\
+\hline
+IDEI & -2.6355 & 0.8193 & -3.2167 & 0.0036\\
+\hline
+IDJOIN & -1.6326 & 0.3821 & -4.2721 & 0.0002\\
+\hline
+Year & 0.0136 & 0.0153 & 0.8881 & 0.3830\\
+\hline
+Chla & -0.9401 & 0.3997 & -2.3521 & 0.0268\\
+\hline
+\end{tabular}
+\end{table}
 
 
 
@@ -525,6 +454,7 @@ data_large3 <- data_completa %>%
     ungroup()
 ```
 
+Figure \@ref(fig:Figure6) show negative relation between recruit index and Chl-a.
 
 
 ``` r
@@ -538,9 +468,16 @@ theme_minimal() + scale_color_viridis_d(option = "F", name = "") +
     labs(title = "", x = "Chl-a", y = "Recruit Index", color = "Año")
 ```
 
-<img src="index_files/figure-html/Figure6-1.jpeg" width="75%" style="display: block; margin: auto;" />
+\begin{figure}[H]
 
-Figure \@ref(fig:Figure4) show negative relation between recruit index and Chl-a.
+{\centering \includegraphics[width=0.75\linewidth]{index_files/figure-latex/Figure6-1} 
+
+}
+
+\caption{Relationship between mean annual chlorophyll-a concentration (Chl-a) and the standardized krill recruit index across years (2001-2022). Each point represents a year and is color-coded accordingly. The black line represents a linear regression fit with a 95\% confidence interval (shaded area). A significant negative correlation was found between Chl-a and the recruit index (*R* = - 0.58, *p* = 0.018)}(\#fig:Figure6)
+\end{figure}
+
+
 
 \pagebreak
 
